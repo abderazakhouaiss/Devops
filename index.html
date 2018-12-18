@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="bootstrap.css" />
+    <script src="jquery-3.3.1.min.js"></script>
+    <script src="bootstrap.js"></script>
+    <script src="jscharts.js"></script>
+</head>
+
+<body style="margin: 2% 20% 10% 20%;">
+    <div class="container">
+        <div class="card mb-2" id="card1">
+            <div class="card-header bg-light">
+                Choix de nombre de projets et critéres.
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label for="nbrC">Nombre de critéres:</label>
+                    <input type="number" name="nbrC" id="nbrC" class="form-control" aria-describedby="helpId" required>
+                </div>
+                <div class="form-group">
+                    <label for="nbrP">Nombre projets:</label>
+                    <input type="number" name="nbrP" id="nbrP" class="form-control" placeholder="" aria-describedby="helpId" required>
+                </div>
+                <button type="submit" id="btn" class="btn btn-info">Valider</button>
+            </div>
+        </div>
+        <div class="card" id="card2" style="display: none;">
+            <div class="card-header bg-dark text-white">
+                Valeurs des critéres et des projets.
+            </div>
+            <h5 class="p-3">Critéres:</h5>
+            <div class="card-body">
+                <div class="form-inline" id="cri">
+
+                </div>
+            </div>
+            <hr style="padding: 0px;margin: 0px;">
+            <h5 class="p-3">Projets:</h5>
+            <div class="card-body">
+                <div class="form-inline" id="pro">
+
+                </div>
+                <div id="btn-div" style="display: none;">
+                    <button type="submit" id="btn1" class="btn btn-info" style="margin-top: 7px;">Calculer SP</button>
+                </div>
+            </div>
+        </div>
+        <div class="card" id="results" style="display: none;margin-top: 5px;">
+            <div class="card-header bg-success text-white">
+                Resultats:
+            </div>
+            <div class="card-body" id="res">
+
+            </div>
+            <button type="button" class="btn btn-primary col-md-3 m-2" data-toggle="modal" data-target="#modelId">
+                Afficher graphe
+            </button>
+        </div>
+    </div>
+    <!-- Button trigger modal -->
+
+    <!-- Modal -->
+    <div class="modal fade" id="modelId" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="modelTitleId">Représentation graphique</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="chartcontainer"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    var c, p;
+    $(document).ready(function() {
+        $('#btn').on('click', function() {
+            c = $('#nbrC').val();
+            p = $('#nbrP').val();
+            $("#results").hide();
+            var txt = "";
+            for (let index = 0; index < c; index++) {
+                txt += '<input class="form-control col-xs-12 col-md-6" type="number" id="c' + index + '" style="margin-bottom: 3px;" required/>';
+            }
+            $('#cri').html(txt);
+            var txt1 = "";
+            var count = 0;
+            for (let index = 0; index < p; index++) {
+                txt1 += '<div class="list-group-item col-md-12">Projet N°' + index + ':<br>';
+                for (let index0 = 0; index0 < c; index0++) {
+                    txt1 += '<input class="form-control col-md-6" type="number" id="cp' + count + '" style="margin-bottom: 3px;width: 100%;" required/>';
+                    count++;
+                }
+                txt1 += '</div><br>';
+            }
+            $('#pro').html(txt1);
+            $('#btn-div').show();
+            $('#card2').show();
+        });
+
+        $('#btn1').on('click', function() {
+            var crit = [];
+            var proj = []
+            var sp;
+            var count = 0;
+            var name;
+            var html = '<table class="table"><tr><td>Projet</td>';
+            for (let index0 = 0; index0 < c; index0++) {
+                html += '<td>Critére' + index0 + '</td>';
+            }
+            html += '<td>SP</td></tr><tr>';
+            for (let index = 0; index < c; index++) {
+                crit[index] = $('#c' + index).val();
+            }
+
+            for (let index = 0; index < p; index++) {
+                name = 'projet' + index;
+                html += '<td>' + name + '</td>';
+                sp = 0;
+                for (let index0 = 0; index0 < c; index0++) {
+                    sp += $('#cp' + (count)).val() * crit[index0];
+                    html += '<td>' + $('#cp' + (count)).val() + '</td>';
+                    count++;
+                }
+                html += '<td>' + sp + '</td></tr>';
+                proj.push([name, sp]);
+            }
+            html += '</table>';
+            $("#res").html(html);
+            $("#results").show();
+
+            var myData = proj;
+            var myChart = new JSChart('chartcontainer', 'bar');
+            myChart.setDataArray(myData);
+            myChart.setTitle('Somme Pondérée');
+            myChart.setAxisNameX('Projets');
+            myChart.setAxisNameY('Somme');
+            myChart.draw();
+        });
+    });
+</script>
+
+</html>
